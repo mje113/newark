@@ -1,7 +1,7 @@
 module Newark
   class Router
 
-    FOUR_O_FOUR = [404, {}, []].freeze
+    FOUR_O_FOUR = [ 404, {}, [] ].freeze
 
     attr_accessor :request, :response
 
