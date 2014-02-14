@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/mje113/newark.png?branch=master)](https://travis-ci.org/mje113/newark)
 [![Coverage Status](https://coveralls.io/repos/mje113/newark/badge.png)](https://coveralls.io/r/mje113/newark)
+[![Code Climate](https://codeclimate.com/github/mje113/newark.png)](https://codeclimate.com/github/mje113/newark)
 
 A Pico Web Framework
 
