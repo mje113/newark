@@ -1,5 +1,8 @@
 # Newark
 
+[![Build Status](https://travis-ci.org/mje113/newark.png?branch=master)](https://travis-ci.org/mje113/newark)
+
+
 A Pico Web Framework
 
 ## Installation
