@@ -12,7 +12,7 @@ module Newark
     end
 
     def body
-      @body ||= @env['rack.input'].clone.read
+      @body ||= @env['rack.input'].read
     end
 
     def headers

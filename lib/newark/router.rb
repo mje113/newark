@@ -3,7 +3,7 @@ module Newark
 
     FOUR_O_FOUR = [ 404, {}, [] ].freeze
 
-    attr_accessor :request, :response
+    attr_reader :app, :env, :request, :response
 
     def initialize(app, env)
       @app      = app
