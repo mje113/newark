@@ -2,15 +2,17 @@
 module Newark
   module App
 
+    FOUR_O_FOUR = [ 404, {}, [] ].freeze
+
+    HTTP_VERBS = [ :delete, :get, :head, :options,
+                   :patch, :post, :put, :trace ].freeze
+
     def self.included(klass)
       klass.instance_variable_set :@routes,       []
       klass.instance_variable_set :@before_hooks, []
       klass.instance_variable_set :@after_hooks,  []
       klass.extend ClassMethods
     end
-
-    HTTP_VERBS = [ :delete, :get, :head, :options,
-                   :patch, :post, :put, :trace ].freeze
 
     module ClassMethods
 
@@ -34,20 +36,58 @@ module Newark
       end
     end
 
+    attr_reader :request, :response
+
     def call(env)
-      Router.new(self, env).route!
+      @env      = env
+      @request  = Request.new(env)
+      @response = Response.new
+      dup.route
+    end
+
+    def headers
+      response.headers
+    end
+
+    def params
+      request.params
+    end
+
+    def route
+      exec_before_hooks
+      route = match_route
+      if route
+        request.params.merge!(route.params)
+        response.body = instance_exec(&route.handler)
+        exec_after_hooks
+        response.finish
+      else
+        FOUR_O_FOUR
+      end
+    end
+
+    private
+
+    def match_route
+      Router.new(routes, request).route
     end
 
     def routes
-      self.class.instance_variable_get :@routes
+      self.class.instance_variable_get(:@routes)
     end
 
-    def before_hooks
-      self.class.instance_variable_get :@before_hooks
+    def exec_before_hooks
+      exec_hooks self.class.instance_variable_get(:@before_hooks)
     end
 
-    def after_hooks
-      self.class.instance_variable_get :@after_hooks
+    def exec_after_hooks
+      exec_hooks self.class.instance_variable_get(:@after_hooks)
+    end
+
+    def exec_hooks(hooks)
+      hooks.each do |hook|
+        instance_exec(&hook)
+      end
     end
   end
 end

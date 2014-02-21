@@ -9,7 +9,6 @@ module Newark
       @constraints = Constraint.load(constraints)
       @handler     = handler
       @path        = path_matcher(path)
-      @params      = nil
     end
 
     def match?(request)
