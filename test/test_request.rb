@@ -1,5 +1,4 @@
 require 'helper'
-require 'rack/test'
 
 class RequestApp
   include Newark

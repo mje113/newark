@@ -1,5 +1,4 @@
 require 'helper'
-require 'rack/test'
 
 class TestRouter < Minitest::Unit::TestCase
 

@@ -9,3 +9,9 @@ Rake::TestTask.new(:test) do |test|
 end
 
 task :default => :test
+
+task :benchmark do
+  Dir.glob('benchmark/**/benchmark_*.rb').each do |benchmark|
+    require_relative benchmark
+  end
+end
