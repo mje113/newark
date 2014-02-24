@@ -1,11 +1,55 @@
 require 'helper'
 
+class TestingApp
+
+  include Newark
+
+  before do
+    headers['X-Newark-Version'] = Newark::VERSION
+  end
+
+  after do
+    headers['X-Newark-Done'] = 'true'
+  end
+
+  get '/', params: { user: 'frank' } do
+    'hello frank'
+  end
+
+  get '/' do
+    'hello'
+  end
+
+  get(/\/regexp/) do
+    'regexp'
+  end
+
+  get '/create' do
+    'whoops'
+  end
+
+  post '/create' do
+    'created'
+  end
+
+  get '/request_and_response' do
+    request && response
+    headers && params
+    'ok'
+  end
+
+  get '/variables/:a/:b' do
+    "#{params[:a]}:#{params[:b]}"
+  end
+
+end
+
 class TestRouter < Minitest::Unit::TestCase
 
   include Rack::Test::Methods
 
   def app
-    App.new
+    TestingApp.new
   end
 
   def test_gets_root
