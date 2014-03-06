@@ -39,8 +39,8 @@ module Newark
     attr_reader :request, :response
 
     def call(env)
-      @env      = env
-      @request  = Request.new(env)
+      @env      = env.dup
+      @request  = Request.new(@env)
       @response = Response.new
       dup.route
     end
