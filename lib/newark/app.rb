@@ -39,10 +39,14 @@ module Newark
     attr_reader :request, :response
 
     def call(env)
-      @env      = env.dup
+      dup._call(env)
+    end
+
+    def _call(env)
+      @env      = env
       @request  = Request.new(@env)
       @response = Response.new
-      dup.route
+      route
     end
 
     def headers
