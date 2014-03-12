@@ -25,7 +25,7 @@ module Newark
     end
 
     def path_match?(request)
-      @path.match(request.path)
+      @path.match(request.path_info)
     end
 
     def path_matcher(path)
