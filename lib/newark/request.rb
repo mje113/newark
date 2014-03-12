@@ -4,7 +4,9 @@ module Newark
   class Request < Rack::Request
 
     def uri
-      URI(base_url + fullpath)
+      uri = "#{scheme}://#{host_with_port}#{path_info}"
+      uri << "?#{query_string}" unless query_string.empty?
+      URI(uri)
     end
 
     def params
