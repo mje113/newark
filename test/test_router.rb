@@ -42,6 +42,10 @@ class TestingApp
     "#{params[:a]}:#{params[:b]}"
   end
 
+  get '/path_globbing/*rest_of_path' do
+    params[:rest_of_path]
+  end
+
 end
 
 class TestRouter < Minitest::Unit::TestCase
@@ -102,5 +106,11 @@ class TestRouter < Minitest::Unit::TestCase
     get '/variables/fu/bar'
     assert last_response.ok?
     assert_equal 'fu:bar', last_response.body
+  end
+
+  def test_path_globbing
+    get '/path_globbing/rest/of/path'
+    assert last_response.ok?
+    assert_equal 'rest/of/path', last_response.body
   end
 end

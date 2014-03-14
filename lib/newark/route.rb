@@ -2,6 +2,9 @@ module Newark
   class Route
 
     PARAM_MATCHER = /:(?<param>[^\/]*)/.freeze
+    PARAM_SUB     = /:[^\/]*/.freeze
+    PATH_MATCHER  = /\*(?<path>.*)/.freeze
+    PATH_SUB      = /\*.*/.freeze
 
     attr_reader :handler, :params
 
@@ -34,12 +37,21 @@ module Newark
     end
 
     def path_params(path)
-      return path unless path =~ /:/
-
-      while match = PARAM_MATCHER.match(path)
-        path.sub!(/:[^\/]*/, "(?<#{match[:param]}>[^\/]*)")
-      end
+      match_path(path)
+      match_params(path)
       path
+    end
+
+    def match_path(path)
+      if match = PATH_MATCHER.match(path)
+        path.sub!(PATH_SUB, "(?<#{match[:path]}>.*)")
+      end
+    end
+
+    def match_params(path)
+      while match = PARAM_MATCHER.match(path)
+        path.sub!(PARAM_SUB, "(?<#{match[:param]}>[^\/]*)")
+      end
     end
 
     class Constraint
