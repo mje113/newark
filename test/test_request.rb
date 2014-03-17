@@ -34,6 +34,11 @@ class TestRequest < Minitest::Unit::TestCase
     assert_equal 'Bar', last_response.body
   end
 
+  def test_headers_with_odd_format
+    get '/headers', {}, { 'HTTP_X-fu' => 'Bar' }
+    assert_equal 'Bar', last_response.body
+  end
+
   def test_body
     post '/body', {}, { 'rack.input' => StringIO.new('fubar') }
     assert_equal 'fubar', last_response.body

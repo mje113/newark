@@ -26,7 +26,7 @@ module Newark
     def original_headers
       {}.tap do |headers|
         env.select { |k, v| k.start_with?('HTTP_') }.each_pair do |k, v|
-          header = k.sub(/^HTTP_/, '').split('_').map(&:capitalize).join('-')
+          header = k.sub(/^HTTP_/, '').gsub(/_/, '-').split('-').map(&:capitalize).join('-')
           headers[header] = v
         end
       end
