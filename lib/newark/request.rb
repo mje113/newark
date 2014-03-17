@@ -6,7 +6,7 @@ module Newark
     def uri
       uri = "#{scheme}://#{host_with_port}#{path_info}"
       uri << "?#{query_string}" unless query_string.empty?
-      URI(uri)
+      URI(URI.escape(uri))
     end
 
     def params
