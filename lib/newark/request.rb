@@ -1,4 +1,5 @@
 require 'active_support/hash_with_indifferent_access'
+require 'securerandom'
 
 module Newark
   class Request < Rack::Request
@@ -21,6 +22,11 @@ module Newark
 
     def headers
       @headers ||= original_headers
+    end
+
+    def request_id
+      @env['action_dispatch.request_id'] ||
+      (@env['rack.request_id'] ||= headers['X-Request-Id'] || SecureRandom.uuid)
     end
 
     protected

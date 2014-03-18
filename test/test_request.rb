@@ -14,6 +14,10 @@ class RequestApp
   post '/body' do
     request.body
   end
+
+  get '/request_id' do
+    request.request_id
+  end
 end
 
 class TestRequest < Minitest::Unit::TestCase
@@ -42,6 +46,17 @@ class TestRequest < Minitest::Unit::TestCase
   def test_body
     post '/body', {}, { 'rack.input' => StringIO.new('fubar') }
     assert_equal 'fubar', last_response.body
+  end
+
+  def test_request_id
+    get '/request_id'
+    refute last_response.body.empty?
+  end
+
+  def test_request_id_when_passed
+    request_id = '1234567890'
+    get '/request_id', {}, { 'HTTP_X_REQUEST_ID' => request_id }
+    assert_equal request_id, last_response.body
   end
 
 end
