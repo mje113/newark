@@ -58,12 +58,13 @@ module Newark
     end
 
     def route
-      exec_before_hooks
       route = match_route
       if route
         request.params.merge!(route.params)
-        response.body = instance_exec(&route.handler)
-        exec_after_hooks
+        if exec_before_hooks.all? { |hook| hook != false }
+          response.body = instance_exec(&route.handler)
+          exec_after_hooks
+        end
         response.finish
       else
         FOUR_O_FOUR
@@ -89,7 +90,7 @@ module Newark
     end
 
     def exec_hooks(hooks)
-      hooks.each do |hook|
+      hooks.map do |hook|
         instance_exec(&hook)
       end
     end
