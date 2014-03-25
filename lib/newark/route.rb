@@ -9,6 +9,8 @@ module Newark
     attr_reader :handler, :params
 
     def initialize(path, constraints, handler)
+      fail ArgumentError, 'You must define a route handler' if handler.nil?
+
       @constraints = Constraint.load(constraints)
       @handler     = handler
       @path        = path_matcher(path)

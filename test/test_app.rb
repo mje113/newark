@@ -3,13 +3,6 @@ require 'helper'
 class NameApp
   include Newark
 
-  before do
-    if params[:key] != '123456789'
-      response.status = 403
-      false
-    end
-  end
-
   def upcase(str)
     str.upcase
   end
@@ -18,7 +11,15 @@ class NameApp
     upcase(params[:name])
   end
 
-  get '/' do
+  get '/hello1' do
+    hello
+  end
+
+  get '/hello2', :hello
+
+  private
+
+  def hello
     'Hello'
   end
 end
@@ -32,9 +33,19 @@ class TestApp < Minitest::Unit::TestCase
   end
 
   def test_instance_method_access
-    get '/upcaser', { key: '123456789', name: 'mike' }
+    get '/upcaser', { name: 'mike' }
     assert last_response.ok?
     assert_equal 'MIKE', last_response.body
+  end
+
+  def test_alternate_action_invocation
+    get '/hello1'
+    assert last_response.ok?
+    assert_equal 'Hello', last_response.body
+
+    get '/hello2'
+    assert last_response.ok?
+    assert_equal 'Hello', last_response.body
   end
 
   # def test_before_hooks_halting_execution

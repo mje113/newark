@@ -17,14 +17,22 @@ module Newark
     module ClassMethods
 
       HTTP_VERBS.each do |verb|
-        define_method verb do |path, options = {}, &block|
+        define_method verb do |path, *args, &block|
+          if block.is_a?(Proc)
+            handler = block
+            options = args[0] || {}
+          else
+            handler = args[0]
+            options = args[1] || {}
+          end
+
           options.merge!(request_method: verb.to_s.upcase)
-          define_route(path, options, &block)
+          define_route(path, options, handler)
         end
       end
 
-      def define_route(path, options, &block)
-        @routes << Route.new(path, options, block)
+      def define_route(path, options, handler)
+        @routes << Route.new(path, options, handler)
       end
 
       def before(&block)
@@ -62,7 +70,7 @@ module Newark
       if route
         request.params.merge!(route.params)
         exec_before_hooks
-        response.body = instance_exec(&route.handler)
+        response.body = exec_handler(route.handler)
         exec_after_hooks
         response.finish
       else
@@ -78,6 +86,14 @@ module Newark
 
     def routes
       self.class.instance_variable_get(:@routes)
+    end
+
+    def exec_handler(handler)
+      if handler.respond_to? :to_sym
+        send(handler)
+      else
+        instance_exec(&handler)
+      end
     end
 
     def exec_before_hooks
