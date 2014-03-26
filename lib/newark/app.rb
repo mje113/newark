@@ -8,9 +8,7 @@ module Newark
                    :patch, :post, :put, :trace ].freeze
 
     def self.included(klass)
-      klass.instance_variable_set :@routes,       {}
-      klass.instance_variable_set :@before_hooks, []
-      klass.instance_variable_set :@after_hooks,  []
+      klass.instance_variable_set :@routes, {}
       klass.extend ClassMethods
     end
 
@@ -36,10 +34,12 @@ module Newark
       end
 
       def before(&block)
+        @before_hooks ||= []
         @before_hooks << block
       end
 
       def after(&block)
+        @after_hooks ||= []
         @after_hooks << block
       end
     end
@@ -109,6 +109,7 @@ module Newark
     end
 
     def exec_hooks(hooks)
+      return if hooks.nil?
       hooks.each do |hook|
         exec(hook)
       end
