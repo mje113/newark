@@ -8,7 +8,7 @@ module Newark
                    :patch, :post, :put, :trace ].freeze
 
     def self.included(klass)
-      klass.instance_variable_set :@routes,       []
+      klass.instance_variable_set :@routes,       {}
       klass.instance_variable_set :@before_hooks, []
       klass.instance_variable_set :@after_hooks,  []
       klass.extend ClassMethods
@@ -20,19 +20,19 @@ module Newark
         define_method verb do |path, *args, &block|
           if block.is_a?(Proc)
             handler = block
-            options = args[0] || {}
+            constraints = args[0] || {}
           else
             handler = args[0]
-            options = args[1] || {}
+            constraints = args[1] || {}
           end
 
-          options.merge!(request_method: verb.to_s.upcase)
-          define_route(path, options, handler)
+          define_route(verb.to_s.upcase, path, constraints, handler)
         end
       end
 
-      def define_route(path, options, handler)
-        @routes << Route.new(path, options, handler)
+      def define_route(verb, path, constraints, handler)
+        @routes[verb] ||= []
+        @routes[verb] << Route.new(path, constraints, handler)
       end
 
       def before(&block)
@@ -85,15 +85,19 @@ module Newark
     end
 
     def routes
-      self.class.instance_variable_get(:@routes)
+      self.class.instance_variable_get(:@routes)[@request.request_method]
+    end
+
+    def exec(action)
+      if action.respond_to? :to_sym
+        send(action)
+      else
+        instance_exec(&action)
+      end
     end
 
     def exec_handler(handler)
-      if handler.respond_to? :to_sym
-        send(handler)
-      else
-        instance_exec(&handler)
-      end
+      exec(handler)
     end
 
     def exec_before_hooks
@@ -106,7 +110,7 @@ module Newark
 
     def exec_hooks(hooks)
       hooks.each do |hook|
-        instance_exec(&hook)
+        exec(hook)
       end
     end
   end
