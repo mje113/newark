@@ -46,6 +46,14 @@ class TestingApp
     params[:rest_of_path]
   end
 
+  get '/trailing_slash/' do
+    'trailing_slash'
+  end
+
+  get '/no_trailing_slash' do
+    'no_trailing_slash'
+  end
+
 end
 
 class TestRouter < Minitest::Unit::TestCase
@@ -112,5 +120,25 @@ class TestRouter < Minitest::Unit::TestCase
     get '/path_globbing/rest/of/path'
     assert last_response.ok?
     assert_equal 'rest/of/path', last_response.body
+  end
+
+  def test_deals_with_trailing_slashes
+    get '/trailing_slash/'
+    assert last_response.ok?
+    assert_equal 'trailing_slash', last_response.body
+
+    get '/trailing_slash'
+    assert last_response.ok?
+    assert_equal 'trailing_slash', last_response.body
+  end
+
+  def test_deals_with_no_trailing_slashes
+    get '/no_trailing_slash/'
+    assert last_response.ok?
+    assert_equal 'no_trailing_slash', last_response.body
+
+    get '/no_trailing_slash'
+    assert last_response.ok?
+    assert_equal 'no_trailing_slash', last_response.body
   end
 end

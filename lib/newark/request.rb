@@ -12,6 +12,10 @@ module Newark
       URI(URI.escape(uri))
     end
 
+    def path_info
+      @path_info ||= super == '/' ? super : super.sub(/\/$/, '')
+    end
+
     def params
       @params ||= ActiveSupport::HashWithIndifferentAccess.new(super)
     end

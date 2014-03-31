@@ -41,7 +41,7 @@ module Newark
     def path_params(path)
       match_path(path)
       match_params(path)
-      path
+      path != '/' ? path.sub(/\/$/, '') : path
     end
 
     def match_path(path)
