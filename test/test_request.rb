@@ -20,7 +20,7 @@ class RequestApp
   end
 end
 
-class TestRequest < Minitest::Unit::TestCase
+class TestRequest < Minitest::Test
 
   include Rack::Test::Methods
 

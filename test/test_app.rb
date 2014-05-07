@@ -24,7 +24,7 @@ class NameApp
   end
 end
 
-class TestApp < Minitest::Unit::TestCase
+class TestApp < Minitest::Test
 
   include Rack::Test::Methods
 

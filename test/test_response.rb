@@ -1,4 +1,5 @@
 require 'helper'
+require 'multi_json'
 
 class ResponseApp
   include Newark
@@ -8,7 +9,7 @@ class ResponseApp
   end
 end
 
-class TestResponse < Minitest::Unit::TestCase
+class TestResponse < Minitest::Test
 
   include Rack::Test::Methods
 
