@@ -76,10 +76,13 @@ module Newark
       route = match_route
       if route
         request.params.merge!(route.params)
-        if exec_before_hooks
-          response.body = exec(route.handler)
-          exec_after_hooks
-        end
+        # if exec_before_hooks
+        #   response.body = exec(route.handler)
+        #   exec_after_hooks
+        # end
+        exec_before_hooks
+        response.body = exec(route.handler)
+        exec_after_hooks
         response.finish
       else
         FOUR_O_FOUR

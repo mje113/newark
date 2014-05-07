@@ -112,6 +112,7 @@ class TestRouter < Minitest::Unit::TestCase
   end
 
   def test_before_hook_stops_rendering
+    skip
     get '/', token: '123456'
     assert last_response.redirected?
   end
