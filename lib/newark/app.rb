@@ -46,6 +46,13 @@ module Newark
 
     attr_reader :request, :response
 
+    def initialize(*)
+      super
+      @before_hooks = self.class.instance_variable_get(:@before_hooks)
+      @after_hooks  = self.class.instance_variable_get(:@after_hooks)
+      @routes       = self.class.instance_variable_get(:@routes)
+    end
+
     def call(env)
       dup._call(env)
     end
@@ -69,9 +76,10 @@ module Newark
       route = match_route
       if route
         request.params.merge!(route.params)
-        exec_before_hooks
-        response.body = exec_handler(route.handler)
-        exec_after_hooks
+        if exec_before_hooks
+          response.body = exec(route.handler)
+          exec_after_hooks
+        end
         response.finish
       else
         FOUR_O_FOUR
@@ -85,7 +93,7 @@ module Newark
     end
 
     def routes
-      self.class.instance_variable_get(:@routes)[@request.request_method]
+      @routes[@request.request_method]
     end
 
     def exec(action)
@@ -101,17 +109,17 @@ module Newark
     end
 
     def exec_before_hooks
-      exec_hooks self.class.instance_variable_get(:@before_hooks)
+      exec_hooks @before_hooks
     end
 
     def exec_after_hooks
-      exec_hooks self.class.instance_variable_get(:@after_hooks)
+      exec_hooks @after_hooks
     end
 
     def exec_hooks(hooks)
-      return if hooks.nil?
+      return true if hooks.nil?
       hooks.each do |hook|
-        exec(hook)
+        return false unless exec(hook)
       end
     end
   end

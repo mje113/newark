@@ -8,6 +8,12 @@ class TestingApp
     headers['X-Newark-Version'] = Newark::VERSION
   end
 
+  before do
+    if params[:token] && params[:token] == '123456'
+      redirect_to 'http://example.com' && return
+    end
+  end
+
   after do
     headers['X-Newark-Done'] = 'true'
   end
@@ -103,6 +109,11 @@ class TestRouter < Minitest::Unit::TestCase
   def test_before_hook
     get '/'
     assert_equal Newark::VERSION, last_response.header['X-Newark-Version']
+  end
+
+  def test_before_hook_stops_rendering
+    get '/', token: '123456'
+    assert last_response.redirected?
   end
 
   def test_after_hook
