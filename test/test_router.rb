@@ -62,7 +62,7 @@ class TestingApp
 
 end
 
-class TestRouter < Minitest::Unit::TestCase
+class TestRouter < Minitest::Test
 
   include Rack::Test::Methods
 

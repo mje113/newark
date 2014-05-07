@@ -8,7 +8,7 @@ class ResponseApp
   end
 end
 
-class TestResponse < Minitest::Unit::TestCase
+class TestResponse < Minitest::Test
 
   include Rack::Test::Methods
 
