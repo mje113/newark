@@ -6,6 +6,6 @@ require 'newark'
 require 'rack/test'
 require 'minitest/autorun'
 
-class Minitest::Test
+class MiniTest::Unit::TestCase
 
 end
