@@ -84,7 +84,7 @@ module Newark
         response.body = exec(route.handler)
         exec_after_hooks
         status, headers, body = response.finish
-        [status, headers, body.body]
+        [status, headers, body.respond_to?(:body) ? body.body : body]
       else
         FOUR_O_FOUR
       end
