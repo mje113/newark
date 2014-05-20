@@ -27,4 +27,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'pry'
   spec.add_development_dependency 'benchmark-ips'
   spec.add_development_dependency 'multi_json'
+  spec.add_development_dependency 'minitest', '~> 4.2'
 end
