@@ -76,13 +76,10 @@ module Newark
       route = match_route
       if route
         request.params.merge!(route.params)
-        # if exec_before_hooks
-        #   response.body = exec(route.handler)
-        #   exec_after_hooks
-        # end
-        exec_before_hooks
-        response.body = exec(route.handler)
-        exec_after_hooks
+        if exec_before_hooks
+          response.body = exec(route.handler)
+          exec_after_hooks
+        end
         status, headers, body = response.finish
         [status, headers, body.respond_to?(:body) ? body.body : body]
       else
@@ -123,7 +120,7 @@ module Newark
     def exec_hooks(hooks)
       return true if hooks.nil?
       hooks.each do |hook|
-        return false unless exec(hook)
+        return false if exec(hook) == false
       end
     end
   end

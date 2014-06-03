@@ -3,6 +3,13 @@ require 'helper'
 class NameApp
   include Newark
 
+  before do
+    if params[:key] && params[:key] != '23'
+      response.status = 403
+      false
+    end
+  end
+
   def upcase(str)
     str.upcase
   end
@@ -13,6 +20,10 @@ class NameApp
 
   get '/hello1' do
     hello
+  end
+
+  get '/fail' do
+    'This should not be reached'
   end
 
   get '/hello2', :hello
@@ -48,11 +59,11 @@ class TestApp < MiniTest::Unit::TestCase
     assert_equal 'Hello', last_response.body
   end
 
-  # def test_before_hooks_halting_execution
-  #   get '/'
-  #   refute last_response.ok?
-  #   assert_equal 403, last_response.status
-  #   assert_equal '', last_response.body
-  # end
+  def test_before_hooks_halting_execution
+    get '/fail', { key: '1234' }
+    refute last_response.ok?
+    assert_equal 403, last_response.status
+    assert_equal '', last_response.body
+  end
 
 end
