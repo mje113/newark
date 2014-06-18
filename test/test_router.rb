@@ -67,7 +67,7 @@ class TestRouter < MiniTest::Unit::TestCase
   include Rack::Test::Methods
 
   def app
-    TestingApp.new
+    Rack::Lint.new(TestingApp.new)
   end
 
   def test_gets_root

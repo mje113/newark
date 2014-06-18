@@ -40,7 +40,7 @@ class TestApp < MiniTest::Unit::TestCase
   include Rack::Test::Methods
 
   def app
-    NameApp.new
+    Rack::Lint.new(NameApp.new)
   end
 
   def test_instance_method_access

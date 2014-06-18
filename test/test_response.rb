@@ -14,7 +14,7 @@ class TestResponse < MiniTest::Unit::TestCase
   include Rack::Test::Methods
 
   def app
-    ResponseApp.new
+    Rack::Lint.new(ResponseApp.new)
   end
 
   def test_json_api

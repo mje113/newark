@@ -25,7 +25,7 @@ class TestRequest < MiniTest::Unit::TestCase
   include Rack::Test::Methods
 
   def app
-    RequestApp.new
+    Rack::Lint.new(RequestApp.new)
   end
 
   def test_uri
@@ -44,7 +44,7 @@ class TestRequest < MiniTest::Unit::TestCase
   end
 
   def test_body
-    post '/body', {}, { 'rack.input' => StringIO.new('fubar') }
+    post '/body', 'fubar'
     assert_equal 'fubar', last_response.body
   end
 
