@@ -13,13 +13,19 @@ module Newark
 
       @constraints = Constraint.load(constraints)
       @handler     = handler
+      @path_type   = :string
       @path        = path_matcher(path)
+      @params      = {}
     end
 
     def match?(request)
-      path_data = path_match?(request)
-      if path_data && constraints_match?(request)
-        @params = Hash[ path_data.names.zip( path_data.captures ) ]
+      if @path_type == :string
+        string_path_match?(request)
+      else
+        path_data = regexp_path_match?(request)
+        if path_data && constraints_match?(request)
+          @params = Hash[ path_data.names.zip( path_data.captures ) ]
+        end
       end
     end
 
@@ -29,13 +35,22 @@ module Newark
       @constraints.all? { |constraint| constraint.match?(request) }
     end
 
-    def path_match?(request)
+    def string_path_match?(request)
+      @path == request.path_info
+    end
+
+    def regexp_path_match?(request)
       @path.match(request.path_info)
     end
 
     def path_matcher(path)
-      return path if path.is_a? Regexp
-      /^#{path_params(path.to_s)}$/
+      if path.respond_to?(:to_str) && !path[/:/]
+        path
+      else
+        @path_type = :regexp
+        return path if path.is_a? Regexp
+        /^#{path_params(path.to_s)}$/
+      end
     end
 
     def path_params(path)
