@@ -20,7 +20,7 @@ module Newark
 
     def match?(request)
       if @path_type == :string
-        string_path_match?(request)
+        string_path_match?(request) && constraints_match?(request)
       else
         path_data = regexp_path_match?(request)
         if path_data && constraints_match?(request)
@@ -36,7 +36,8 @@ module Newark
     end
 
     def string_path_match?(request)
-      @path == request.path_info
+      (@path == request.path_info) ||
+      (@path == "#{request.path_info}/")
     end
 
     def regexp_path_match?(request)
@@ -44,7 +45,7 @@ module Newark
     end
 
     def path_matcher(path)
-      if path.respond_to?(:to_str) && !path[/:/]
+      if path.respond_to?(:to_str) && (!path[/:/] && !path[/\*/])
         path
       else
         @path_type = :regexp
