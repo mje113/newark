@@ -63,10 +63,10 @@ def app
   App.new
 end
 
-# 50_000.times do
-#   get '/hello1'
-#   get '/hello2'
-# end
+50_000.times do
+  get '/hello1'
+  get '/hello2'
+end
 
 Benchmark.ips do |x|
 
