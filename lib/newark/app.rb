@@ -75,7 +75,6 @@ module Newark
     def route
       route = match_route
       if route
-        request.params.merge!(route.params)
         if exec_before_hooks
           response.body = exec(route.handler)
           exec_after_hooks
