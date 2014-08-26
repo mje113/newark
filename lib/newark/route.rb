@@ -6,7 +6,7 @@ module Newark
     PATH_MATCHER  = /\*(?<path>.*)/.freeze
     PATH_SUB      = /\*.*/.freeze
 
-    attr_reader :handler, :params
+    attr_reader :handler
 
     def initialize(path, constraints, handler)
       fail ArgumentError, 'You must define a route handler' if handler.nil?
@@ -18,8 +18,10 @@ module Newark
 
     def match?(request)
       path_data = path_match?(request)
-      if path_data && constraints_match?(request)
-        @params = Hash[ path_data.names.zip( path_data.captures ) ]
+      (path_data && constraints_match?(request)).tap do |matched|
+        if matched
+          request.params.merge! Hash[ path_data.names.zip( path_data.captures ) ]
+        end
       end
     end
 
