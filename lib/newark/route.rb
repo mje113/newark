@@ -1,61 +1,46 @@
 module Newark
   class Route
 
-    PARAM_MATCHER = /:(?<param>[^\/]*)/.freeze
-    PARAM_SUB     = /:[^\/]*/.freeze
-    PATH_MATCHER  = /\*(?<path>.*)/.freeze
-    PATH_SUB      = /\*.*/.freeze
+    PLACEHOLDER_REGEXP = {
+      /:(\w+)/    => "([^#?/]+)", # any wildcard param that starts with ":"
+      /\\\*(\w+)/ => "([^#?]+)"   # any wildcard param that starts with "*"
+    }
 
-    attr_reader :handler
+    attr_reader :handler, :regex, :keys
 
     def initialize(path, constraints, handler)
       fail ArgumentError, 'You must define a route handler' if handler.nil?
 
       @constraints = Constraint.load(constraints)
       @handler     = handler
-      @path        = path_matcher(path)
+      @regex, @keys = path_matcher(path)
     end
-
-    def match?(request)
-      path_data = path_match?(request)
-      (path_data && constraints_match?(request)).tap do |matched|
-        if matched
-          request.params.merge! Hash[ path_data.names.zip( path_data.captures ) ]
-        end
-      end
-    end
-
-    private
 
     def constraints_match?(request)
       @constraints.all? { |constraint| constraint.match?(request) }
     end
 
-    def path_match?(request)
-      @path.match(request.path_info)
-    end
+    private
 
     def path_matcher(path)
-      return path if path.is_a? Regexp
-      /^#{path_params(path.to_s)}$/
+      path.is_a?(Regexp) ? [path, []] : compile(path)
     end
 
-    def path_params(path)
-      match_path(path)
-      match_params(path)
-      path != '/' ? path.sub(/\/$/, '') : path
-    end
-
-    def match_path(path)
-      if match = PATH_MATCHER.match(path)
-        path.sub!(PATH_SUB, "(?<#{match[:path]}>.*)")
+    # compiles a path pattern to derive a regex and all the keys
+    def compile(path_pattern)
+      keys = []
+      segments = []
+      path_pattern.split("/").each do |segment|
+        segments << Regexp.escape(segment).tap do |reg|
+          PLACEHOLDER_REGEXP.each do |placeholder, replacement|
+            reg.gsub!(placeholder) do
+              keys << $1
+              replacement
+            end
+          end
+        end
       end
-    end
-
-    def match_params(path)
-      while match = PARAM_MATCHER.match(path)
-        path.sub!(PARAM_SUB, "(?<#{match[:param]}>[^\/]*)")
-      end
+      return Regexp.new(segments.any? ? segments.join(?/) : ?/), keys
     end
 
     class Constraint

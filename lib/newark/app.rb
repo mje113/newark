@@ -51,6 +51,17 @@ module Newark
       @before_hooks = self.class.instance_variable_get(:@before_hooks)
       @after_hooks  = self.class.instance_variable_get(:@after_hooks)
       @routes       = self.class.instance_variable_get(:@routes)
+      # @multiplex_routes is a Hash, used to store all the multiplex routes
+      # each verb has an array of multiplex routes that represent all the
+      # sequential combination of route patterns.
+      @multiplex_routes = {}.tap do |values|
+        @routes.each do |verb, rtes|
+          values[verb] = (0..rtes.size-1).map do |index|
+            regexps = rtes[index..-1].map.with_index {|route, i| /(?<_#{i}>#{route.regex})/ }
+            /\A#{Regexp.union(regexps)}\z/
+          end
+        end
+      end
     end
 
     def call(env)
@@ -75,6 +86,13 @@ module Newark
     def route
       route = match_route
       if route
+        # updates the params in the request based on the keys in the matched route
+        unless route.keys.empty?
+          match_data = route.regex.match(request.path_info)
+          route.keys.each_with_index do |key, i|
+            request.params[key] = match_data[i + 1]
+          end
+        end
         if exec_before_hooks
           response.body = exec(route.handler)
           exec_after_hooks
@@ -88,8 +106,24 @@ module Newark
 
     private
 
-    def match_route
-      Router.new(routes, request).route
+    # a recursive method finds the route by matching the request path
+    # by a multiplex matcher
+    def match_route(index = 0)
+      routes_matcher = routes_matchers[index]
+      if routes_matcher === @request.path_info
+        last_match_index = Regexp.last_match.captures.find_index {|x| x} + index
+        route = routes[last_match_index]
+        if route.constraints_match?(@request)
+          return route
+        else
+          return match_route(last_match_index+1)
+        end
+      end
+      nil
+    end
+
+    def routes_matchers
+      @multiplex_routes[@request.request_method]
     end
 
     def routes
