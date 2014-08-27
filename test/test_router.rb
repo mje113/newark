@@ -68,6 +68,10 @@ class TestingApp
     "matched in #{params[:format]}: #{params[:id]}"
   end
 
+  get '/wildcard_path_test/*path.xml' do
+    "matched in #{params[:path]}"
+  end
+
 end
 
 class TestRouter < MiniTest::Unit::TestCase
@@ -172,6 +176,15 @@ class TestRouter < MiniTest::Unit::TestCase
     get '/multiple_params_extension_test/abc.json'
     assert last_response.ok?
     assert_equal 'matched in json: abc', last_response.body
+  end
+
+  def test_wildcard_path_matching
+    get '/wildcard_path_test/abc/def/g.xml'
+    assert last_response.ok?
+    assert_equal 'matched in abc/def/g', last_response.body
+
+    get '/wildcard_path_test/abc/def/g.json'
+    assert_equal 404, last_response.status
   end
 
 end
