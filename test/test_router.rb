@@ -60,6 +60,18 @@ class TestingApp
     'no_trailing_slash'
   end
 
+  get '/extension_test/:id.xml' do
+    "matched in xml: #{params[:id]}"
+  end
+
+  get '/multiple_params_extension_test/:id.:format' do
+    "matched in #{params[:format]}: #{params[:id]}"
+  end
+
+  get '/wildcard_path_test/*path.xml' do
+    "matched in #{params[:path]}"
+  end
+
 end
 
 class TestRouter < MiniTest::Unit::TestCase
@@ -153,4 +165,26 @@ class TestRouter < MiniTest::Unit::TestCase
     assert last_response.ok?
     assert_equal 'no_trailing_slash', last_response.body
   end
+
+  def test_xml_extension_matching
+    get '/extension_test/123.xml'
+    assert last_response.ok?
+    assert_equal 'matched in xml: 123', last_response.body
+  end
+
+  def test_xml_extension_matching
+    get '/multiple_params_extension_test/abc.json'
+    assert last_response.ok?
+    assert_equal 'matched in json: abc', last_response.body
+  end
+
+  def test_wildcard_path_matching
+    get '/wildcard_path_test/abc/def/g.xml'
+    assert last_response.ok?
+    assert_equal 'matched in abc/def/g', last_response.body
+
+    get '/wildcard_path_test/abc/def/g.json'
+    assert_equal 404, last_response.status
+  end
+
 end
