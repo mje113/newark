@@ -2,10 +2,12 @@
 module Newark
   module App
 
-    FOUR_O_FOUR = [ 404, {}, [] ].freeze
+    FOUR_O_FOUR  = [ 404, {}, [] ].freeze
+    NEWARK_ROUTE = 'newark.route'.freeze
+    HTTP_VERBS   = [ :delete, :get, :head, :options,
+                     :patch, :post, :put, :trace ].freeze
 
-    HTTP_VERBS = [ :delete, :get, :head, :options,
-                   :patch, :post, :put, :trace ].freeze
+    UNMATCHED_ROUTE = Struct.new(:name).new('').freeze
 
     def self.included(klass)
       klass.instance_variable_set :@routes, {}
@@ -18,19 +20,21 @@ module Newark
         define_method verb do |path, *args, &block|
           if block.is_a?(Proc)
             handler = block
+            name = args[0].delete(:name) if args[0]
             constraints = args[0] || {}
           else
             handler = args[0]
+            name = args[1].delete(:name) if args[1]
             constraints = args[1] || {}
           end
 
-          define_route(verb.to_s.upcase, path, constraints, handler)
+          define_route(verb.to_s.upcase, path, constraints, handler, name || path)
         end
       end
 
-      def define_route(verb, path, constraints, handler)
+      def define_route(verb, path, constraints, handler, name)
         @routes[verb] ||= []
-        @routes[verb] << Route.new(path, constraints, handler)
+        @routes[verb] << Route.new(path, constraints, handler, name)
       end
 
       def before(&block)
@@ -74,14 +78,19 @@ module Newark
 
     def route
       route = match_route
+
       if route
+        set_route(route)
+
         if exec_before_hooks
           response.body = exec(route.handler)
           exec_after_hooks
         end
+
         status, headers, body = response.finish
         [status, headers, body.respond_to?(:body) ? body.body : body]
       else
+        set_route
         FOUR_O_FOUR
       end
     end
@@ -94,6 +103,10 @@ module Newark
 
     def routes
       @routes[@request.request_method]
+    end
+
+    def set_route(route=UNMATCHED_ROUTE)
+      @env[NEWARK_ROUTE] = route
     end
 
     def exec(action)
