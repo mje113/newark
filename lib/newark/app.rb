@@ -50,13 +50,6 @@ module Newark
 
     attr_reader :request, :response
 
-    def initialize(*)
-      super
-      @before_hooks = self.class.instance_variable_get(:@before_hooks)
-      @after_hooks  = self.class.instance_variable_get(:@after_hooks)
-      @routes       = self.class.instance_variable_get(:@routes)
-    end
-
     def call(env)
       dup._call(env)
     end
@@ -102,7 +95,7 @@ module Newark
     end
 
     def routes
-      @routes[@request.request_method]
+      self.class.instance_variable_get(:@routes)[@request.request_method]
     end
 
     def set_route(route=UNMATCHED_ROUTE)
@@ -122,11 +115,11 @@ module Newark
     end
 
     def exec_before_hooks
-      exec_hooks @before_hooks
+      exec_hooks self.class.instance_variable_get(:@before_hooks)
     end
 
     def exec_after_hooks
-      exec_hooks @after_hooks
+      exec_hooks self.class.instance_variable_get(:@after_hooks)
     end
 
     def exec_hooks(hooks)
