@@ -76,6 +76,11 @@ module Newark
       request.params
     end
 
+    def redirect_to path
+       @response.status=302
+       headers['Location']=path
+       ''
+    end 
     def route
       route = match_route
 
